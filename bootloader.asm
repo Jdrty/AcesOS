@@ -12,6 +12,8 @@ start:
     mov sp, 0x7C00      
     sti                 
 
+    mov [DriveNumber], dl  
+
     mov si, MSG_BOOT    
     call print_string
 
@@ -39,11 +41,23 @@ load_kernel:
     mov cl, 2           
     mov dh, 0           
     mov dl, [DriveNumber] 
+
+    mov cx, 3          
+
+.retry:
     int 0x13            
-    jc disk_error       
+    jc reset_disk       
     cmp al, 20          
-    jne disk_error      
-    ret
+    jne reset_disk      
+    ret                 
+
+reset_disk:
+    mov ah, 0x00        
+    mov dl, [DriveNumber]
+    int 0x13            
+    dec cx              
+    jnz .retry          
+    jmp disk_error      
 
 disk_error:
     mov si, MSG_DISK_ERROR
