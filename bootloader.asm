@@ -12,7 +12,22 @@ start:
     mov sp, 0x7C00      
     sti                 
 
-    jmp $
+    mov si, MSG_BOOT    
+    call print_string
+
+    jmp 0x1000          
+
+print_string:
+    lodsb               
+    test al, al         
+    jz .done            
+    mov ah, 0x0E        
+    int 0x10            
+    jmp print_string    
+.done:
+    ret
+
+MSG_BOOT db "Bootloader running...", 0x0D, 0x0A, 0
 
 times 510-($-$$) db 0   
-dw 0xAA55
+dw 0xAA55               
